@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<meta name="description" content="Vize ve final notlarını gir, harf notlarını hesapla.">
+<title>Notmatik | Vize Final Hesaplayıcı</title>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:#080e1a;color:#ecf2ff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse 68% 42% at 50% -7%,#243b69 0%,transparent 75%),#080e1a}
+main{max-width:1060px;margin:auto;padding:55px 22px 80px}
+.pill{display:inline-block;border:1px solid #415172;border-radius:99px;padding:7px 13px;color:#b8c9ff;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+h1{font-size:clamp(34px,6vw,60px);letter-spacing:-.055em;line-height:1.08;margin:20px 0 14px}h1 span{color:#8dadff}
+.intro{color:#a6b4ce;margin:0 0 34px;line-height:1.65;max-width:650px}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.panel{background:rgba(17,27,46,.93);border:1px solid #2b3b55;border-radius:23px;padding:26px;box-shadow:0 14px 45px #0002}
+.panel h2{font-size:20px;margin:0 0 22px;letter-spacing:-.02em}
+.field{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;font-weight:650;font-size:14px}
+.hint{font-size:12px;color:#91a3bf;font-weight:500}
+input[type=number]{width:100%;font-family:inherit;font-size:30px;font-weight:750;color:#fff;background:#0b1425;border:1px solid #40516d;border-radius:13px;padding:15px 16px;outline:none}
+input[type=number]:focus{border-color:#88a9ff;box-shadow:0 0 0 3px #88a9ff28}
+input[type=range]{width:100%;accent-color:#93b0ff;margin:14px 0 5px;cursor:pointer}
+.meta{display:flex;gap:9px;flex-wrap:wrap;margin:17px 0 26px}
+.meta span{border-radius:9px;background:#22314b;color:#c1d0e8;padding:8px 10px;font-size:12px;font-weight:600}
+.result{background:linear-gradient(125deg,#304985,#263760);border:1px solid #536aab;border-radius:18px;padding:19px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.small{font-size:12px;color:#c4d2f5}.big{font-size:34px;letter-spacing:-.05em;font-weight:800;margin:5px 0 0}.grade{font-size:38px;font-weight:850}
+.subnote{font-size:12px;color:#9caec9;line-height:1.65;margin:15px 0 0}
+.full{grid-column:1/-1}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;text-align:left}
+th{color:#91a6c5;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;border-bottom:1px solid #30405a;padding:0 12px 15px}
+td{border-bottom:1px solid #26354c;padding:16px 12px;font-size:14px}tr:last-child td{border-bottom:0}td:first-child{font-weight:800}
+.score{color:#a9c3ff;font-weight:750}.muted{color:#8ea0ba}
+.notice{border-left:3px solid #8caaff;padding:10px 13px;background:#202f4b;border-radius:4px 10px 10px 4px;color:#c2d1e9;font-size:13px;line-height:1.55;margin-top:18px}
+.error{color:#ffb9b9;min-height:18px;font-size:12px;margin:7px 0}
+footer{color:#8293aa;font-size:12px;text-align:center;margin:25px 0}
+@media(max-width:700px){main{padding:35px 15px 50px}.layout{grid-template-columns:1fr}.panel{padding:20px}.full{grid-column:auto}th,td{padding:13px 7px;font-size:12px}.grade{font-size:31px}}
+</style>
+</head>
+<body>
+<main>
+<div class="pill">Notmatik · Öğrenci aracı</div>
+<h1>Finalden kaç alırsam <span>geçerim?</span></h1>
+<p class="intro">Vize notunu gir, finalden hangi puan aralığında hangi harf notunu alacağını anında gör. Hesaplamalar güncel harf notu tablosuna göre yapılır.</p>
+<div class="layout">
+<section class="panel" aria-labelledby="heading-input">
+<h2 id="heading-input">Notlarını hesapla</h2>
+<label class="field" for="midterm">Vize notun <span class="hint">0–100</span></label>
+<input id="midterm" type="number" inputmode="decimal" min="0" max="100" step="any" value="81">
+<div id="err" class="error" role="alert"></div>
+<div class="meta"><span>Vize %40</span><span>Final %60</span><span>Final barajı 35</span></div>
+<label class="field" for="final">Final senaryon <strong id="finalValue">50</strong></label>
+<input id="final" type="range" min="0" max="100" step="1" value="50">
+<div class="result" aria-live="polite">
+<div><div class="small">Genel ortalaman</div><div id="average" class="big">62,40</div></div>
+<div style="text-align:right"><div class="small">Harf notun</div><div id="letter" class="grade">CC</div></div>
+</div>
+<p id="status" class="subnote"></p>
+</section>
+<section class="panel" aria-labelledby="heading-target">
+<h2 id="heading-target">Hedefini belirle</h2>
+<div class="result" style="margin-top:6px"><div><div class="small">CC ve üzeri için minimum final</div><div id="target" class="big">46</div></div><div style="font-size:30px" aria-hidden="true">🎯</div></div>
+<p class="subnote">CC ve üzeri, genel ortalamanın en az 60 olduğu notlardır. DC ve DD koşullu geçmeye tabi olabilir.</p>
+<div class="notice"><strong>Önemli:</strong> Finalden 35'in altında alırsan genel ortalaman yüksek olsa bile final barajını sağlayamazsın. Notlar yuvarlanmadan değerlendirilmiştir.</div>
+</section>
+<section class="panel full" aria-labelledby="heading-table">
+<h2 id="heading-table">Kaç alırsan hangi harf notu gelir?</h2>
+<div class="table-wrap"><table><thead><tr><th>Harf notu</th><th>Finalden alman gereken</th><th>Katsayı</th><th>Durum</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="notice">Finalden 0–34 almak barajdan kalma anlamına gelir. DC ve DD için kesin geçme koşulunu üniversitenin güncel yönetmeliğinden kontrol et.</div>
+</section>
+</div>
+<footer>Notmatik · Vize %40 + Final %60 · Final barajı 35</footer>
+</main>
+<script>
+const bands=[{name:'AA',min:90,coef:'4,00',state:'Geçer'},{name:'BA',min:82,coef:'3,50',state:'Geçer'},{name:'BB',min:75,coef:'3,00',state:'Geçer'},{name:'CB',min:67,coef:'2,50',state:'Geçer'},{name:'CC',min:60,coef:'2,00',state:'Geçer'},{name:'DC',min:50,coef:'1,50',state:'Koşullu'},{name:'DD',min:45,coef:'1,00',state:'Koşullu'},{name:'FF',min:0,coef:'0,00',state:'Kalır'}];
+const get=id=>document.getElementById(id);
+const fmt=n=>n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+function grade(avg){return bands.find(b=>avg+1e-9>=b.min)?.name||'FF'}
+function run(){
+const raw=get('midterm').value.replace(',','.'),v=Number(raw),ok=raw.trim()!==''&&Number.isFinite(v)&&v>=0&&v<=100;
+const f=Number(get('final').value);get('finalValue').textContent=f;
+get('err').textContent=ok?'':'0 ile 100 arasında bir vize notu gir.';
+if(!ok){get('average').textContent='—';get('letter').textContent='—';get('target').textContent='—';get('rows').innerHTML='';get('status').textContent='';return}
+const avg=v*.4+f*.6,g=f<35?'Baraj':grade(avg);
+get('average').textContent=fmt(avg);get('letter').textContent=g;
+get('status').textContent=f<35?'Final notun 35’in altında: final barajını sağlamıyorsun.':g==='DC'||g==='DD'?'Bu not koşullu geçmeye tabi olabilir.':g==='FF'?'Genel ortalaman geçmek için yeterli değil.':'Bu senaryoda harf notun '+g+'.';
+const all=Array.from({length:66},(_,i)=>i+35);
+let target=all.find(n=>v*.4+n*.6+1e-9>=60);
+get('target').textContent=target===undefined?'Mümkün değil':target;
+let html='';
+for(const b of bands){
+const vals=all.filter(n=>grade(v*.4+n*.6)===b.name);
+const range=vals.length?(vals[0]===vals[vals.length-1]?String(vals[0]):vals[0]+'–'+vals[vals.length-1]):'Bu vizeyle mümkün değil';
+html+='<tr><td>'+b.name+'</td><td class="'+(vals.length?'score':'muted')+'">'+range+'</td><td>'+b.coef+'</td><td>'+b.state+'</td></tr>';
+}
+get('rows').innerHTML=html;
+}
+get('midterm').addEventListener('input',run);
+get('final').addEventListener('input',run);
+run();
+</script>
+</body>
+</html>
